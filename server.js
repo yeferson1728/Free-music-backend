@@ -3,7 +3,7 @@ const cors = require("cors");
 const axios = require("axios");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const APP_NAME = "FreeFlowMusic";
 
 app.use(cors());
@@ -15,12 +15,14 @@ app.get("/api/stream/:id", async (req, res) => {
   console.log(`🎯 Solicitando stream para ID: ${id}`);
 
   try {
-    // Usamos discoveryprovider directamente, que acepta shortId también
-    const response = await axios.get(`https://discoveryprovider.audius.co/v1/tracks/${id}/stream`, {
-      params: { app_name: APP_NAME },
-      maxRedirects: 0,
-      validateStatus: status => status >= 200 && status < 400
-    });
+    const response = await axios.get(
+      `https://discoveryprovider.audius.co/v1/tracks/${id}/stream`,
+      {
+        params: { app_name: APP_NAME },
+        maxRedirects: 0,
+        validateStatus: (status) => status >= 200 && status < 400,
+      }
+    );
 
     const location = response.headers.location;
 
@@ -33,7 +35,6 @@ app.get("/api/stream/:id", async (req, res) => {
     }
   } catch (err) {
     console.error("❌ Error al pedir stream:", err.message);
-
     if (err.response) {
       console.error("🔍 Detalles:", err.response.status, err.response.data);
       res.status(err.response.status).json({ error: err.response.data });
